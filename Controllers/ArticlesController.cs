@@ -2,16 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Firefly.Models;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace Firefly.Controllers
 {
     [Route("api/[controller]")]
-    public class ArticlesController : Controller
+    public class ArticlesController : ProtectedController
     {
-        private readonly ArticleContext _context;
-        public ArticlesController(ArticleContext context)
+        private readonly ApplicationDbContext _context;
+        public ArticlesController(ApplicationDbContext context)
         {
             _context = context;
         }
@@ -19,6 +20,7 @@ namespace Firefly.Controllers
         // GET: /<controller>/
         public IEnumerable<Article> Get()
         {
+            //var user = _context.Users. this.User.Identity.Name;
             return _context.Articles.Include(article => article.Author).ToList();
         }
 

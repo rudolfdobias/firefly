@@ -8,10 +8,10 @@ using Microsoft.EntityFrameworkCore;
 namespace Firefly.Controllers
 {
     [Route("api/[controller]")]
-    public class AuthorsController : Controller
+    public class AuthorsController : ProtectedController
     {
-        private readonly ArticleContext _context;
-        public AuthorsController(ArticleContext context)
+        private readonly ApplicationDbContext _context;
+        public AuthorsController(ApplicationDbContext context)
         {
             _context = context;
         }
