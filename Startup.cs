@@ -1,5 +1,6 @@
 using System;
 using System.Security.Claims;
+using Firefly.Extensions;
 using Firefly.Models;
 using Firefly.Providers;
 using Microsoft.AspNetCore.Builder;
@@ -37,12 +38,16 @@ namespace Firefly
             loggerFactory.AddDebug();
             
             ConfigureAuthServer(app);
-            app.UseMvc();
             app.UseCors(
                 // very benevolent CORS for start
                 builder => builder.AllowAnyOrigin().AllowAnyHeader()
                 );
-
+            app.UseCurrentUserMiddleware();
+            if (env.IsDevelopment() || env.IsStaging()){
+                app.UseDebugHeadersMiddleware();
+            }
+            app.UseMvc();
+            
             UserSeeder.Initialize(app.ApplicationServices);
             var crap = new CrapSeeder(app.ApplicationServices);
             crap.Seed();
@@ -74,10 +79,9 @@ namespace Firefly
             services.AddAuthentication();
             services.AddIdentity<ApplicationUser, Role>()
             .AddEntityFrameworkStores<ApplicationDbContext, Guid>()
-            //.AddDefaultTokenProviders()
             .AddUserStore<UserStore<ApplicationUser, Role, ApplicationDbContext, Guid>>()
             .AddRoleStore<RoleStore<Role, ApplicationDbContext, Guid>>();
-
+            services.AddSingleton<ICurrentUserProvider, CurrentUserProvider>();
         }
 
         private void ConfigureAuthServer(IApplicationBuilder app){

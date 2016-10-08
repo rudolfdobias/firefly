@@ -2,6 +2,15 @@
 
 JSON REST API made with .NET Core 1.0 + ASP.NET Core 1.0 + Entity Framework Core (EF7)
 
+## Features
+
+ - Oauth 2.0 password and refresh_token flow
+ - Working ASP.NET Core ACL
+ - Simple generic model for data queries with metadata & hateoas
+ - CORS
+ - MVC ready for application logic
+ - Debugging headers in development mode
+
 ## Requirements & Installation
 
  - Since .NET Core is multiplatform you can run it on *Windows*, *OSX* or *Linux*.
@@ -18,18 +27,12 @@ JSON REST API made with .NET Core 1.0 + ASP.NET Core 1.0 + Entity Framework Core
 
 There is a UserSeeder class in `Firefly.Models` namespace. Fill values you like, uncomment the `return;` statement within `Initialize()` and run application. There is no sophisticated user seeder so far.
 
-## Implementations
-
- - Oauth 2.0 password and refresh_token flow
- - Simple generic model for data queries
- - CORS
- - MVC ready for application logic
-
 ## Sample routes
 
  - Oauth: `/oauth/token`
- - Sample *Articles* `/api/articles`
- - Sample *Authors* `/api/authors`
+ - Current user `/api/users/current`
+ - Sample *Articles* resource `/api/articles`
+ - Sample *Authors* resource `/api/authors`
 
 
 

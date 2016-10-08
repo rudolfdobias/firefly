@@ -72,6 +72,7 @@
 --reference:/home/rudolf/.nuget/packages/Microsoft.Extensions.CommandLineUtils/1.0.0/lib/netstandard1.3/Microsoft.Extensions.CommandLineUtils.dll
 --reference:/home/rudolf/.nuget/packages/Microsoft.Extensions.Configuration/1.0.0/lib/netstandard1.1/Microsoft.Extensions.Configuration.dll
 --reference:/home/rudolf/.nuget/packages/Microsoft.Extensions.Configuration.Abstractions/1.0.0/lib/netstandard1.0/Microsoft.Extensions.Configuration.Abstractions.dll
+--reference:/home/rudolf/.nuget/packages/Microsoft.Extensions.Configuration.CommandLine/1.0.0/lib/netstandard1.1/Microsoft.Extensions.Configuration.CommandLine.dll
 --reference:/home/rudolf/.nuget/packages/Microsoft.Extensions.Configuration.EnvironmentVariables/1.0.0/lib/netstandard1.3/Microsoft.Extensions.Configuration.EnvironmentVariables.dll
 --reference:/home/rudolf/.nuget/packages/Microsoft.Extensions.Configuration.FileExtensions/1.0.0/lib/netstandard1.3/Microsoft.Extensions.Configuration.FileExtensions.dll
 --reference:/home/rudolf/.nuget/packages/Microsoft.Extensions.Configuration.Json/1.0.0/lib/netstandard1.3/Microsoft.Extensions.Configuration.Json.dll
@@ -207,6 +208,8 @@
 /home/rudolf/Desktop/work/firefly/Controllers/UsersController.cs
 /home/rudolf/Desktop/work/firefly/Controllers/ResultSet.cs
 /home/rudolf/Desktop/work/firefly/Helpers/QueryString.cs
+/home/rudolf/Desktop/work/firefly/Extensions/MiddlewareExtensions.cs
+/home/rudolf/Desktop/work/firefly/Extensions/LongHumanReadableByte.cs
 /home/rudolf/Desktop/work/firefly/Extensions/JsonLogger.cs
 /home/rudolf/Desktop/work/firefly/Migrations/ApplicationDbContextModelSnapshot.cs
 /home/rudolf/Desktop/work/firefly/Migrations/20161008094935_TestModel.Designer.cs
@@ -222,4 +225,8 @@
 /home/rudolf/Desktop/work/firefly/Models/UserSeeder.cs
 /home/rudolf/Desktop/work/firefly/Models/TestModel.cs
 /home/rudolf/Desktop/work/firefly/Models/Author.cs
+/home/rudolf/Desktop/work/firefly/Middleware/DebugHeadersMiddleware.cs
+/home/rudolf/Desktop/work/firefly/Middleware/CurrentUserMiddleware.cs
 /home/rudolf/Desktop/work/firefly/Providers/AuthorizationProvider.cs
+/home/rudolf/Desktop/work/firefly/Providers/CurrentUserProvider.cs
+/home/rudolf/Desktop/work/firefly/Providers/ICurrentUserProvider.cs
