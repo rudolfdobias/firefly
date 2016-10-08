@@ -204,8 +204,10 @@
 /home/rudolf/Desktop/work/firefly/Controllers/TestModelController.cs
 /home/rudolf/Desktop/work/firefly/Controllers/ProtectedController.cs
 /home/rudolf/Desktop/work/firefly/Controllers/AuthorsController.cs
+/home/rudolf/Desktop/work/firefly/Controllers/UsersController.cs
 /home/rudolf/Desktop/work/firefly/Controllers/ResultSet.cs
 /home/rudolf/Desktop/work/firefly/Helpers/QueryString.cs
+/home/rudolf/Desktop/work/firefly/Extensions/JsonLogger.cs
 /home/rudolf/Desktop/work/firefly/Migrations/ApplicationDbContextModelSnapshot.cs
 /home/rudolf/Desktop/work/firefly/Migrations/20161008094935_TestModel.Designer.cs
 /home/rudolf/Desktop/work/firefly/Migrations/20161007142828_Initial.cs

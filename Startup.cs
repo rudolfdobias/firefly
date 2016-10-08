@@ -1,4 +1,5 @@
 using System;
+using System.Security.Claims;
 using Firefly.Models;
 using Firefly.Providers;
 using Microsoft.AspNetCore.Builder;
@@ -76,15 +77,17 @@ namespace Firefly
             //.AddDefaultTokenProviders()
             .AddUserStore<UserStore<ApplicationUser, Role, ApplicationDbContext, Guid>>()
             .AddRoleStore<RoleStore<Role, ApplicationDbContext, Guid>>();
+
         }
 
         private void ConfigureAuthServer(IApplicationBuilder app){
             app.UseOAuthValidation();
             app.UseOpenIdConnectServer(options => {
-                options.Provider = new AuthorizationProvider();
+                options.Provider = new AuthorizationProvider(app.ApplicationServices.GetRequiredService<ILogger<AuthorizationProvider>>());
                 options.AuthorizationEndpointPath = "/oauth/authorize";
                 options.TokenEndpointPath = "/oauth/token";
                 options.AllowInsecureHttp = true;
+                options.AutomaticAuthenticate = true;            
             });
         }
 

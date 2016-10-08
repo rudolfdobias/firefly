@@ -2,16 +2,23 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using AspNet.Security.OpenIdConnect.Extensions;
 using AspNet.Security.OpenIdConnect.Server;
+using Firefly.Extensions;
 using Firefly.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace Firefly.Providers{
     public sealed class AuthorizationProvider:OpenIdConnectServerProvider{
 
+        private readonly ILogger<AuthorizationProvider> logger;
+        public AuthorizationProvider(ILogger<AuthorizationProvider> logger){
+            this.logger = logger;
+        }
         public override Task ValidateTokenRequest(ValidateTokenRequestContext context) {
             // Reject the token requests that don't use grant_type=password or grant_type=refresh_token.
             if (!context.Request.IsPasswordGrantType() && !context.Request.IsRefreshTokenGrantType()) {
@@ -32,82 +39,87 @@ namespace Firefly.Providers{
             return Task.FromResult(0);
         }
 
-        public override async Task HandleTokenRequest(HandleTokenRequestContext context) {
-    // Resolve ASP.NET Core Identity's user manager from the DI container.
-    var manager = context.HttpContext.RequestServices.GetRequiredService<UserManager<ApplicationUser>>();
-    if (context.Request.IsPasswordGrantType()) {
-        var user = await manager.FindByNameAsync(context.Request.Username);
-        if (user == null) {
-            context.Reject(
-                error: OpenIdConnectConstants.Errors.InvalidGrant,
-                description: "Invalid credentials.");
+        public override async Task HandleTokenRequest(HandleTokenRequestContext context) 
+        {
+            // Resolve ASP.NET Core Identity's user manager from the DI container.
+            var manager = context.HttpContext.RequestServices.GetRequiredService<UserManager<ApplicationUser>>();
+            if (context.Request.IsPasswordGrantType()) {
+                var user = await manager.FindByNameAsync(context.Request.Username);
+                var roles = await manager.GetRolesAsync(user);
+                logger.LogDebug("Found roles for user " + user.UserName + ":");
+                logger.LogDebugJson(roles);
 
-            return;
-        }
+                if (user == null) {
+                    context.Reject(
+                        error: OpenIdConnectConstants.Errors.InvalidGrant,
+                        description: "Invalid credentials.");
 
-        // Ensure the user is not already locked out.
-        if (manager.SupportsUserLockout && await manager.IsLockedOutAsync(user)) {
-            context.Reject(
-                error: OpenIdConnectConstants.Errors.InvalidGrant,
-                description: "Invalid credentials.");
+                    return;
+                }
 
-            return;
-        }
+                // Ensure the user is not already locked out.
+                if (manager.SupportsUserLockout && await manager.IsLockedOutAsync(user)) {
+                    context.Reject(
+                        error: OpenIdConnectConstants.Errors.InvalidGrant,
+                        description: "Invalid credentials.");
 
-        // Ensure the password is valid.
-        if (!await manager.CheckPasswordAsync(user, context.Request.Password)) {
-            if (manager.SupportsUserLockout) {
-                await manager.AccessFailedAsync(user);
-            }
+                    return;
+                }
 
-            context.Reject(
-                error: OpenIdConnectConstants.Errors.InvalidGrant,
-                description: "Invalid credentials.");
+                // Ensure the password is valid.
+                if (!await manager.CheckPasswordAsync(user, context.Request.Password)) {
+                    if (manager.SupportsUserLockout) {
+                        await manager.AccessFailedAsync(user);
+                    }
 
-            return;
-        }
+                    context.Reject(
+                        error: OpenIdConnectConstants.Errors.InvalidGrant,
+                        description: "Invalid credentials.");
 
-        if (manager.SupportsUserLockout) { 
-            await manager.ResetAccessFailedCountAsync(user);
-        }
+                    return;
+                }
 
-        // Reject the token request if two-factor authentication has been enabled by the user.
-        if (manager.SupportsUserTwoFactor && await manager.GetTwoFactorEnabledAsync(user)) {
-            context.Reject(
-                error: OpenIdConnectConstants.Errors.InvalidGrant,
-                description: "Two-factor authentication is required for this account.");
+                if (manager.SupportsUserLockout) { 
+                    await manager.ResetAccessFailedCountAsync(user);
+                }
 
-            return;
-        }
+            
 
-        var identity = new ClaimsIdentity(context.Options.AuthenticationScheme);
+                // Redefining Name and Role types manually - see fucking why https://leastprivilege.com/2016/08/21/why-does-my-authorize-attribute-not-work/
+                var identity = new ClaimsIdentity(context.Options.AuthenticationScheme, "Name", "Role");
+       
+                identity.AddClaim(ClaimTypes.NameIdentifier, user.Id.ToString());
+                
+                identity.AddClaim("Name", user.UserName,
+                    OpenIdConnectConstants.Destinations.AccessToken,
+                    OpenIdConnectConstants.Destinations.IdentityToken);    
 
-        // Note: the name identifier is always included in both identity and
-        // access tokens, even if an explicit destination is not specified.
-        identity.AddClaim(ClaimTypes.NameIdentifier, user.UserName);
+                // Add roles to the claims
+                foreach (var role in roles){
+                    identity.AddClaim("Role", role,
+                    OpenIdConnectConstants.Destinations.AccessToken,
+                    OpenIdConnectConstants.Destinations.IdentityToken);
+                } 
+                
+                logger.LogDebugJson(identity);
+                
+                var ticket = new AuthenticationTicket(
+                    new ClaimsPrincipal(identity),
+                    new AuthenticationProperties(),
+                    context.Options.AuthenticationScheme);
 
-        // When adding custom claims, you MUST specify one or more destinations.
-        // Read "part 7" for more information about custom claims and scopes.
-        identity.AddClaim("username", await manager.GetUserNameAsync(user),
-            OpenIdConnectConstants.Destinations.AccessToken,
-            OpenIdConnectConstants.Destinations.IdentityToken);
+                // Todo: Define scopes when useful ...
 
-        // Create a new authentication ticket holding the user identity.
-        var ticket = new AuthenticationTicket(
-            new ClaimsPrincipal(identity),
-            new AuthenticationProperties(),
-            context.Options.AuthenticationScheme);
+               /* ticket.SetScopes(
+                     OpenIdConnectConstants.Scopes.OpenId,
+                     OpenIdConnectConstants.Scopes.Email,
+                    OpenIdConnectConstants.Scopes.Profile);
+                */
+                
+                // Set the resource servers the access token should be issued for.
+                ticket.SetResources("resource_server");
 
-        // Set the list of scopes granted to the client application.
-        ticket.SetScopes(
-            /* openid: */ OpenIdConnectConstants.Scopes.OpenId,
-            /* email: */ OpenIdConnectConstants.Scopes.Email,
-            /* profile: */ OpenIdConnectConstants.Scopes.Profile);
-
-        // Set the resource servers the access token should be issued for.
-        ticket.SetResources("resource_server");
-
-        context.Validate(ticket);
+                context.Validate(ticket);
     }
 }
 

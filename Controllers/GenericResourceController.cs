@@ -7,11 +7,11 @@ using Firefly.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
-
-
+using Microsoft.AspNetCore.Authorization;
 
 namespace Firefly.Controllers{
 
+    [Authorize]
     [Route("api/[controller]")]
     public class GenericResourceController<TEntity> : ProtectedController where TEntity:BaseEntity  
     {
