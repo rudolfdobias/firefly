@@ -36,9 +36,12 @@ namespace Firefly
             loggerFactory.AddDebug();
             
             ConfigureAuthServer(app);
-            UserSeeder.Initialize(app.ApplicationServices);
             app.UseMvc();
 
+            UserSeeder.Initialize(app.ApplicationServices);
+            var crap = new CrapSeeder(app.ApplicationServices);
+            crap.Seed();
+            
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.

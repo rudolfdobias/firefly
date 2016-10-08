@@ -20,7 +20,8 @@
     "Npgsql.EntityFrameworkCore.PostgreSQL.Design": "1.0.2",
     "Microsoft.EntityFrameworkCore.Design": "1.0.0-preview2-final",
     "AspNet.Security.OpenIdConnect.Server": "1.0.0-beta6-final",
-    "AspNet.Security.OAuth.Validation": "1.0.0-alpha2-final"
+    "AspNet.Security.OAuth.Validation": "1.0.0-alpha2-final",
+    "System.Text.Encodings.Web": "4.0.0"
   },
 
   "tools": {

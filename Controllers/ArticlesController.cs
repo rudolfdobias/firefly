@@ -5,7 +5,7 @@ namespace Firefly.Controllers
     public class ArticlesController : GenericResourceController<Article>
     {
         public ArticlesController(ApplicationDbContext context) 
-            :base(context, new Article())
+            :base(context)
         {}
     }
 }
