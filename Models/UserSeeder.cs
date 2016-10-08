@@ -12,6 +12,7 @@ namespace Firefly.Models{
     {
         public static void Initialize(IServiceProvider serviceProvider)
         {
+            return;
             var context = serviceProvider.GetService<ApplicationDbContext>();
 
             string[] roles = new string[] { "Administrator" };

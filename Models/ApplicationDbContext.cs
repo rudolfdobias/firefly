@@ -1,7 +1,6 @@
 using System;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 
 namespace Firefly.Models
@@ -16,6 +15,7 @@ namespace Firefly.Models
 
         public DbSet<Article> Articles { get; set; }
         public DbSet<Author> Authors { get; set; }
+        public DbSet<TestModel> TestModels {get; set;}
 
         protected override void OnModelCreating(ModelBuilder modelBuilder){
             

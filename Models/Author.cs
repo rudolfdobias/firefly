@@ -3,9 +3,8 @@ using System.Collections.Generic;
 
 namespace Firefly.Models
 {
-    public class Author
+    public class Author : BaseEntity
     {
-        public Guid Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
 
