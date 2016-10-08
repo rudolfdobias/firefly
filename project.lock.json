@@ -10133,6 +10133,7 @@
     "": [
       "AspNet.Security.OAuth.Validation >= 1.0.0-alpha2-final",
       "AspNet.Security.OpenIdConnect.Server >= 1.0.0-beta6-final",
+      "Microsoft.AspNetCore.Cors >= 1.0.0",
       "Microsoft.AspNetCore.Identity >= 1.0.0",
       "Microsoft.AspNetCore.Identity.EntityFrameworkCore >= 1.0.0",
       "Microsoft.AspNetCore.Mvc >= 1.0.0",

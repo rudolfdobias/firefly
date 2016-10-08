@@ -37,6 +37,10 @@ namespace Firefly
             
             ConfigureAuthServer(app);
             app.UseMvc();
+            app.UseCors(
+                // very benevolent CORS for start
+                builder => builder.AllowAnyOrigin().AllowAnyHeader()
+                );
 
             UserSeeder.Initialize(app.ApplicationServices);
             var crap = new CrapSeeder(app.ApplicationServices);
