@@ -1,13 +1,17 @@
 # The Firefly Experiment
 
+
 JSON REST API made with .NET Core 1.0 + ASP.NET Core 1.0 + Entity Framework Core (EF7)
+
 
 ---
 
 
 [![build status](https://gitlab.com/rudolfdobias/firefly/badges/master/build.svg)](https://gitlab.com/rudolfdobias/firefly/commits/master)
 
+
 ---
+
 
 ## Features
 
@@ -27,6 +31,7 @@ JSON REST API made with .NET Core 1.0 + ASP.NET Core 1.0 + Entity Framework Core
  - Current user `/api/users/current`
  - Sample *Articles* resource `/api/articles`
  - Sample *Authors* resource `/api/authors`
+
 
 ---
 
