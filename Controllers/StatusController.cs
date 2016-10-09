@@ -11,5 +11,11 @@ namespace Firefly.Controllers{
                 Status = "OK"
             });
         }
+
+        [Route("/loaderio-32b325992f3d08dbb7d4d02c87fb6465")]
+        public IActionResult Benchmark(){
+            return StatusCode(200, "loaderio-32b325992f3d08dbb7d4d02c87fb6465");
+        }
+
     }
 }

@@ -17,7 +17,7 @@ namespace Firefly.Models {
                     Title = "Fucking article no. " + i.ToString(),
                     Url = "nemam",
                     Body = RandomString(200),
-                    AuthorId = new Guid("fb0456da-e790-4562-da2b-08d3eec27e8f")
+                    AuthorId = new Guid("4729d472-1ae3-4375-fc2b-08d3eff5102a")
                 };
                 context.Articles.Add(entity);
             }
