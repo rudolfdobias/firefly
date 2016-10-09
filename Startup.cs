@@ -1,9 +1,11 @@
 using System;
-using System.Security.Claims;
+using System.IO;
+using System.Security.Cryptography.X509Certificates;
 using Firefly.Extensions;
 using Firefly.Models;
 using Firefly.Providers;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -33,30 +35,37 @@ namespace Firefly
          // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            
-            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            loggerFactory.AddDebug();
-            
+            ConfigureDevelopmentModeServices(app, env, loggerFactory);
             ConfigureAuthServer(app);
             app.UseCors(
                 // very benevolent CORS for start
                 builder => builder.AllowAnyOrigin().AllowAnyHeader()
                 );
+
             app.UseCurrentUserMiddleware();
+            app.UseMvc();
+        }
+
+        private void ConfigureDevelopmentModeServices(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory){
             if (env.IsDevelopment() || env.IsStaging()){
                 app.UseDebugHeadersMiddleware();
+                loggerFactory.AddDebug();
+                UserSeeder.Initialize(app.ApplicationServices);
+                var crap = new CrapSeeder(app.ApplicationServices);
+                crap.Seed();
             }
-            app.UseMvc();
-            
-            UserSeeder.Initialize(app.ApplicationServices);
-            var crap = new CrapSeeder(app.ApplicationServices);
-            crap.Seed();
-            
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDataProtection()
+                .AddKeyManagementOptions(options => {
+                    options.AutoGenerateKeys = true;
+                })
+                .SetApplicationName("Firefly")
+                .PersistKeysToFileSystem(new DirectoryInfo(@"keys/"));
+            
             ConfigureDatabase(services);
             ConfigureAuth(services);
             ConfigureMisc(services);
@@ -86,13 +95,22 @@ namespace Firefly
 
         private void ConfigureAuthServer(IApplicationBuilder app){
             app.UseOAuthValidation();
+        
             app.UseOpenIdConnectServer(options => {
                 options.Provider = new AuthorizationProvider(app.ApplicationServices.GetRequiredService<ILogger<AuthorizationProvider>>());
                 options.AuthorizationEndpointPath = "/oauth/authorize";
                 options.TokenEndpointPath = "/oauth/token";
                 options.AllowInsecureHttp = true;
-                options.AutomaticAuthenticate = true;            
+                options.AutomaticAuthenticate = true;    
+                options.DataProtectionProvider = app.ApplicationServices.GetDataProtectionProvider();
+                options.SigningCredentials.AddCertificate(CreateOauthCertificate());    
             });
+        }
+
+        private X509Certificate2 CreateOauthCertificate(){
+            var path = Configuration["Keys:CertificatePath"];
+            var password = Configuration["Keys:CertificatePassword"];
+            return new X509Certificate2(path, password);
         }
 
     }

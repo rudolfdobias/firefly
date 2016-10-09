@@ -1,3 +1,8 @@
 .vscode/
 obj/
 bin/
+appsettings.json
+appsettings.Production.json
+appsettings.Development.json
+appsettings.Staging.json
+keys/*

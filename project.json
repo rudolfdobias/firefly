@@ -55,7 +55,11 @@
 
   "publishOptions": {
     "include": [
-      "appsettings.json"
+      "appsettings.json",
+      "appsettings.Production.json",
+      "appsettings.Staging.json",
+      "project.json",
+      "hosting.json"
     ]
   },
 
