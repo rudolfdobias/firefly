@@ -1,4 +1,6 @@
+using System;
 using System.Threading.Tasks;
+using Firefly.Models;
 using Firefly.Providers;
 using Microsoft.AspNetCore.Http;
 
@@ -14,8 +16,15 @@ namespace Firefly.Middleware{
 
         public async Task Invoke(HttpContext context)  
         {
-            _provider.HandleFromHttpContextAsync(context);
-            await _next.Invoke(context);
+            
+                var user = await _provider.HandleFromHttpContextAsync(context);
+                if (user is ApplicationUser){
+                    await _next.Invoke(context);
+                } else {
+                    context.Response.StatusCode = 401;
+                    return;// Task.FromResult(0);
+                }
+            
         }
     }
 }

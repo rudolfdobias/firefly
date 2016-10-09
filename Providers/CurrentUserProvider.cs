@@ -25,13 +25,18 @@ namespace Firefly.Providers{
             return this._user;
         }
 
-        public async void HandleFromHttpContextAsync(HttpContext context){
+        public async Task<ApplicationUser> HandleFromHttpContextAsync(HttpContext context){
             if (!context.User.Identity.IsAuthenticated){
                 logger.LogInformation("No user found.");
-                return;
+                return null;
             }
             this._user = await manager.GetUserAsync(context.User);
+            if (this._user == null){
+                return null;
+                logger.LogWarning("User from token does not exists in DB!");
+            }
             logger.LogInformation("User " + this._user.UserName + " set to global provider.");
+            return GetUser();
         }
 
         

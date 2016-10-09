@@ -7,7 +7,7 @@ namespace Firefly.Providers {
     public interface ICurrentUserProvider{
         CurrentUserProvider SetUser(ApplicationUser User);
         ApplicationUser GetUser();
-        void HandleFromHttpContextAsync(HttpContext context);
+        Task<ApplicationUser> HandleFromHttpContextAsync(HttpContext context);
         //void HandleRequest(HttpContext context, Func<Task> next);
     }
 }

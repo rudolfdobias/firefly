@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Firefly.Models;
 using Firefly.Providers;
 using Microsoft.AspNetCore.Identity;
@@ -17,9 +18,9 @@ namespace Firefly.Controllers{
             this.currentUserProvider = currentUserProvider;
         }
         [HttpGet("current")]
-        public ApplicationUser Current(){
-            //return await manager.GetUserAsync(User);
-            return currentUserProvider.GetUser();
+        public async Task<ApplicationUser> Current(){
+            return await manager.GetUserAsync(User);
+            //return currentUserProvider.GetUser();
         }
     }
 }

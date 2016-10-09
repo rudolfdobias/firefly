@@ -6,6 +6,10 @@ using Firefly.Models;
 using Firefly.Providers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.AspNetCore.DataProtection.KeyManagement.Internal;
+using Microsoft.AspNetCore.DataProtection.Repositories;
+using Microsoft.AspNetCore.DataProtection.XmlEncryption;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -35,7 +39,6 @@ namespace Firefly
          // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddConsole();
             ConfigureDevelopmentModeServices(app, env, loggerFactory);
             ConfigureAuthServer(app);
             app.UseCors(
@@ -43,7 +46,7 @@ namespace Firefly
                 builder => builder.AllowAnyOrigin().AllowAnyHeader()
                 );
 
-            app.UseCurrentUserMiddleware();
+            //app.UseCurrentUserMiddleware();
             app.UseMvc();
         }
 
@@ -60,16 +63,20 @@ namespace Firefly
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDataProtection()
-                .AddKeyManagementOptions(options => {
-                    options.AutoGenerateKeys = true;
-                })
-                .SetApplicationName("Firefly")
-                .PersistKeysToFileSystem(new DirectoryInfo(@"keys/"));
-            
+            ConfigureCryptography(services);
             ConfigureDatabase(services);
             ConfigureAuth(services);
             ConfigureMisc(services);
+        }
+
+        private void ConfigureCryptography(IServiceCollection services)
+        {
+            services.AddDataProtection()
+                .AddKeyManagementOptions(options => {
+                    options.AutoGenerateKeys = false;
+                })
+                .SetApplicationName("Firefly")
+                .PersistKeysToFileSystem(new DirectoryInfo(@"keys/"));
         }
 
         private void ConfigureMisc(IServiceCollection services){
