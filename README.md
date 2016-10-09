@@ -1,16 +1,21 @@
 # The Firefly Experiment
 
+
+![build](https://gitlab.com/rudolfdobias/firefly/badges/master/build.svg)
+
 JSON REST API made with .NET Core 1.0 + ASP.NET Core 1.0 + Entity Framework Core (EF7)
 
 ## Features
 
  - Oauth 2.0 password and refresh_token flow
+ - Distributed X509 certificate token signing
  - Working ASP.NET Core ACL
  - Simple generic model for data queries with metadata & hateoas
  - CORS
  - MVC ready for application logic
  - Debugging headers in development mode
-
+ - Docker-ready
+ - Async request handling by ASP.NET Core design
 
 ## Sample routes
 
@@ -18,7 +23,7 @@ JSON REST API made with .NET Core 1.0 + ASP.NET Core 1.0 + Entity Framework Core
  - Current user `/api/users/current`
  - Sample *Articles* resource `/api/articles`
  - Sample *Authors* resource `/api/authors`
-
+---
 ## Requirements & Installation
 
  - Since .NET Core is multiplatform you can run it on *Windows*, *OSX* or *Linux*.
@@ -29,9 +34,16 @@ JSON REST API made with .NET Core 1.0 + ASP.NET Core 1.0 + Entity Framework Core
  1. Install .NET Core on your system. Follow official docs here: [https://www.microsoft.com/net/core](https://www.microsoft.com/net/core)
  2. Check-out this
  3. Run `dotnet restore` in project root folder in order to install packages.
- 4. Configure application and database connection string in `appsettings.json`
+ 4. Configure application and database connection string in `appsettings.json` by provided `appsettings.Template.json` template.
  5. Run migrations by `dotnet ef database update`. Migrations will pour in postgres schema `firefly` (which will be created).
- 6. Run application by `dotnet run`. The web server will start on localhost:5000
+ 6. Run application by `dotnet run`. The web server will start on localhost:8000
+
+### Configuration & Environment
+
+You can set specific environment by setting ENV variable `ASPNETCORE_ENVIRONMENT` to values `Development|Staging|Production`. Furthermore, you can create env-specific configuration files like `appsettings.Production.json`.
+The details are described [here](https://docs.asp.net/en/latest/fundamentals/environments.html#development-staging-production).
+
+The server address:port binging is configurable in `hosting.json`.
 
 ### Creating an Oauth user
 
@@ -59,5 +71,17 @@ For enabling custom certificate:
 
 With distributed custom certificate is application ready to be scaled on multiple docker instances.
 
+---
 
+## Docker usage
 
+ 1. Prepare configuration files for use in Docker. All `appconfig*.json` files will be included in docker image. 
+ 2. Run `docker publish` 
+ 3. Run `docker build -t firefly-api .` Docker image will be built.
+ 4. Run `docker run -p 8000:8000 -e ASPNETCORE_ENVIRONMENT=<environment, optional> -it firefly-api` and enjoy.
+
+## GitLab CI
+
+Docker-in-Docker custom image is used for building this image via custom GitLab Runner. 
+
+Source: [rudolfdobias/dind-dotnet-core-runner](https://github.com/rudolfdobias/dind-dotnet-core-runner)

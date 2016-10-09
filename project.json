@@ -1,11 +1,10 @@
 {
   "dependencies": {
     "Microsoft.NETCore.App": {
-      "version": "1.0.0",
+      "version": "1.0.1",
       "type": "platform"
     },
     "Microsoft.AspNetCore.Mvc": "1.0.0",
-    "Microsoft.AspNetCore.Server.IISIntegration": "1.0.0",
     "Microsoft.AspNetCore.Server.Kestrel": "1.0.0",
     "Microsoft.AspNetCore.Identity": "1.0.0",
     "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "1.0.0",
@@ -14,7 +13,7 @@
     "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0",
     "Microsoft.Extensions.Configuration.FileExtensions": "1.0.0",
     "Microsoft.Extensions.Configuration.Json": "1.0.0",
-    "Microsoft.Extensions.Configuration.CommandLine":"1.0.0",
+    "Microsoft.Extensions.Configuration.CommandLine": "1.0.0",
     "Microsoft.Extensions.Logging": "1.0.0",
     "Microsoft.Extensions.Logging.Console": "1.0.0",
     "Microsoft.Extensions.Logging.Debug": "1.0.0",
@@ -25,51 +24,40 @@
     "AspNet.Security.OAuth.Validation": "1.0.0-alpha2-final",
     "System.Text.Encodings.Web": "4.0.0"
   },
-
   "tools": {
     "Microsoft.EntityFrameworkCore.Tools": {
-        "version": "1.0.0-preview2-final"
+      "version": "1.0.0-preview2-final"
     }
   },
-
   "frameworks": {
     "netcoreapp1.0": {
-      "imports": [
-        "dotnet5.6",
-        "dnxcore50",
-        "portable-net45+win8"
-      ]
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "type": "platform",
+          "version": "1.0.1"
+        }
+      },
+      "imports": "dnxcore50"
     }
   },
-
   "buildOptions": {
     "emitEntryPoint": true,
     "preserveCompilationContext": true
   },
-
   "runtimeOptions": {
     "gcServer": true
   },
-
   "publishOptions": {
     "include": [
-      "appsettings.json",
-      "appsettings.Development.json",
-      "appsettings.Production.json",
-      "appsettings.Staging.json",
+      "appsettings*.json",
       "project.json",
       "hosting.json",
       "keys/"
     ]
   },
-
-  "scripts": {
-  
-  },
-
+  "scripts": {},
   "tooling": {
     "defaultNamespace": "Firefly"
   },
-
   "userSecretsId": "firefly"
 }
