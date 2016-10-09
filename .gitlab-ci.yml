@@ -33,7 +33,7 @@ build:
 deployment-dev:
   stage: deploy-dev
   script:
-    - ecs-deploy -c sailorfly-dev -n api -i $CONTAINER_IMAGE -r eu-west-1
+    - ecs-deploy -c firefly -n api -i $CONTAINER_IMAGE -r eu-west-1
   environment: Development
   dependencies:
     - build
@@ -43,9 +43,9 @@ deployment-dev:
 deployment-prod:
   stage: deploy-prod
   script:
-    - ecs-deploy -c sailorfly-prod -n api -i $CONTAINER_IMAGE -r eu-west-1
+    - ecs-deploy -c firefly -n api -i $CONTAINER_IMAGE -r eu-west-1
   environment: Production
   dependencies:
     - build
   only:
-    - ignore
+    - master

@@ -1,8 +1,7 @@
 {
   "dependencies": {
     "Microsoft.NETCore.App": {
-      "version": "1.0.0",
-      "type": "platform"
+      "version": "1.0.0"
     },
     "Microsoft.AspNetCore.Mvc": "1.0.0",
     "Microsoft.AspNetCore.Server.IISIntegration": "1.0.0",
@@ -56,10 +55,12 @@
   "publishOptions": {
     "include": [
       "appsettings.json",
+      "appsettings.Development.json",
       "appsettings.Production.json",
       "appsettings.Staging.json",
       "project.json",
-      "hosting.json"
+      "hosting.json",
+      "keys/"
     ]
   },
 
