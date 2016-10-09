@@ -20,6 +20,8 @@ build:
   services:
     - docker:dind
   script:
+    - aws s3 cp --recursive s3://firefly-config/keys/ keys/
+    - aws s3 cp --recursive s3://firefly-config/config/ ./
     - dotnet restore
     - dotnet publish
     - eval $(aws ecr get-login --region eu-west-1)
@@ -36,7 +38,7 @@ deployment-dev:
   dependencies:
     - build
   only:
-    - develop
+    - ignore
 
 deployment-prod:
   stage: deploy-prod
@@ -46,4 +48,4 @@ deployment-prod:
   dependencies:
     - build
   only:
-    - master
+    - ignore
