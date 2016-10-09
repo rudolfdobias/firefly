@@ -42,6 +42,7 @@ namespace Firefly
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
+
             ConfigureDevelopmentModeServices(app, env, loggerFactory);
             ConfigureAuthServer(app);
             app.UseCors(
