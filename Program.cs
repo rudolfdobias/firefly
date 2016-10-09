@@ -7,11 +7,15 @@ namespace Firefly
 {
     public class Program
     {
+        private static string[] args;
         public static void Main(string[] args)
         {
+            Program.args = args;
+
             var config = new ConfigurationBuilder()  
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("hosting.json", optional: true)
+                .AddCommandLine(args)
                 .Build();
 
             var host = new WebHostBuilder()
@@ -22,6 +26,10 @@ namespace Firefly
                 .Build();
 
             host.Run();
+        }
+
+        public static string[] GetCliArgs(){
+            return args;
         }
     }
 }

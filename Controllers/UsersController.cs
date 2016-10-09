@@ -3,7 +3,10 @@ using Firefly.Models;
 using Firefly.Providers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Security.Claims;
+using System;
 
 namespace Firefly.Controllers{
     
@@ -19,8 +22,8 @@ namespace Firefly.Controllers{
         }
         [HttpGet("current")]
         public async Task<ApplicationUser> Current(){
-            return await manager.GetUserAsync(User);
-            //return currentUserProvider.GetUser();
+            var userId = new Guid(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            return await manager.Users.Include(u => u.Roles).FirstOrDefaultAsync(u => u.Id == userId);
         }
     }
 }

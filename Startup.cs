@@ -31,15 +31,17 @@ namespace Firefly
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
-                .AddUserSecrets()
+                .AddCommandLine(Program.GetCliArgs())
                 .AddEnvironmentVariables();
+                
+
             Configuration = builder.Build();
         }
 
          // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddConsole();
+            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             ConfigureDevelopmentModeServices(app, env, loggerFactory);
             ConfigureAuthServer(app);
             app.UseCors(

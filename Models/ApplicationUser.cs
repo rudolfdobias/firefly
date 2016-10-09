@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 
@@ -8,5 +9,6 @@ namespace Firefly.Models
     {
         public string FirstName { get; set; }
         public string LastName { get; set; }
+
     }
 }
