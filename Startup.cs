@@ -103,7 +103,9 @@ namespace Firefly
                 options.AllowInsecureHttp = true;
                 options.AutomaticAuthenticate = true;    
                 options.DataProtectionProvider = app.ApplicationServices.GetDataProtectionProvider();
-                options.SigningCredentials.AddCertificate(CreateOauthCertificate());    
+                if (Boolean.Parse(Configuration["Keys:OwnCertificate"])){
+                    options.SigningCredentials.AddCertificate(CreateOauthCertificate());
+                }
             });
         }
 

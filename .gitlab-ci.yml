@@ -1,0 +1,49 @@
+image: rudolfdobias/dind-dotnet-core-runner:latest
+
+services:
+
+cache:
+  paths:
+
+
+stages:
+  - build
+  - deploy-dev
+  - deploy-prod
+
+variables:
+  CONTAINER_IMAGE: 794557722396.dkr.ecr.eu-west-1.amazonaws.com/$AWS_PROJECT_NAME:$CI_BUILD_REF
+  CONTAINER_TAG: 794557722396.dkr.ecr.eu-west-1.amazonaws.com/$AWS_PROJECT_NAME:$CI_BUILD_REF_NAME
+
+build:
+  stage: build
+  services:
+    - docker:dind
+  script:
+    - dotnet restore
+    - dotnet publish
+    - eval $(aws ecr get-login --region eu-west-1)
+    - docker build --pull -t $CONTAINER_IMAGE .
+    - docker push $CONTAINER_IMAGE
+    - docker tag $CONTAINER_IMAGE $CONTAINER_TAG
+    - docker push $CONTAINER_TAG
+
+deployment-dev:
+  stage: deploy-dev
+  script:
+    - ecs-deploy -c sailorfly-dev -n api -i $CONTAINER_IMAGE -r eu-west-1
+  environment: Development
+  dependencies:
+    - build
+  only:
+    - develop
+
+deployment-prod:
+  stage: deploy-prod
+  script:
+    - ecs-deploy -c sailorfly-prod -n api -i $CONTAINER_IMAGE -r eu-west-1
+  environment: Production
+  dependencies:
+    - build
+  only:
+    - master
