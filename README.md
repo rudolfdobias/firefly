@@ -24,6 +24,7 @@ JSON REST API made with .NET Core 1.0 + ASP.NET Core 1.0 + Entity Framework Core
  - Debugging headers in development mode
  - Docker-ready
  - Async request handling by ASP.NET Core design
+ - Configurable by Json / CLI / ENV
 
 ## Sample routes
 
@@ -35,10 +36,12 @@ JSON REST API made with .NET Core 1.0 + ASP.NET Core 1.0 + Entity Framework Core
 
 ---
 
+
 ## Requirements & Installation
 
  - Since .NET Core is multiplatform you can run it on *Windows*, *OSX* or *Linux*.
  - PostgreSQL DB server
+
 
 ### Basic installation
 
@@ -46,7 +49,7 @@ JSON REST API made with .NET Core 1.0 + ASP.NET Core 1.0 + Entity Framework Core
  2. Check-out this
  3. Run `dotnet restore` in project root folder in order to install packages.
  4. Configure application and database connection string in `appsettings.json` by provided `appsettings.Template.json` template.
- 5. Run migrations by `dotnet ef database update`. Migrations will pour in postgres schema `firefly` (which will be created).
+ 5. Run migrations by `dotnet ef database update` or `dotnet run --perform=migrate`. Migrations will be poured in postgres schema `firefly` (which will be created).
  6. Run application by `dotnet run`. The web server will start on localhost:8000
 
 
@@ -55,25 +58,32 @@ JSON REST API made with .NET Core 1.0 + ASP.NET Core 1.0 + Entity Framework Core
 You can set specific environment by setting ENV variable `ASPNETCORE_ENVIRONMENT` to values `Development|Staging|Production`. Furthermore, you can create env-specific configuration files like `appsettings.Production.json`.
 The details are described [here](https://docs.asp.net/en/latest/fundamentals/environments.html#development-staging-production).
 
+
 ### Configuration through CLI or ENV
+
 
 The application accepts command line arguments or ENV variables in specific format and parses them into the configuration. 
 
 Examples:
 
-    dotnet run --environment=Staging
-    dotnet run --Keys:OwnCertificate=true
-    dotnet run --MySettingsKey:MySubKey:SomeProperty="My Value"
+```
+dotnet run --environment=Staging
+dotnet run --Keys:OwnCertificate=true
+dotnet run --MySettingsKey:MySubKey:SomeProperty="My Value"
+```
 
-    or
+or
 
-    export MYSETTINGSKEY__MYSUBKEY__SOMEPROPERTY="My Value"
-    dotnet run
+```
+export MYSETTINGSKEY__MYSUBKEY__SOMEPROPERTY="My Value"
+dotnet run
+```
 
 *(note that in env variables you must use '__' instead of ':')*
 
 
 ### Host Address:Port binding
+
 
 The server address:port binging is configurable in `hosting.json` or by CLI arg: 
 
@@ -81,12 +91,12 @@ The server address:port binging is configurable in `hosting.json` or by CLI arg:
 
 ---
 
-## Creating an Oauth user
 
-There is a UserSeeder class in `Firefly.Models` namespace. Fill values you like, uncomment the `return;` statement within `Initialize()` and run application. 
-Or create it in the DB manually.
+## Creating Root user
 
-There is no other sophisticated user seeder. Yet.
+
+Run `dotnet run --perform=createMasterUser`. An user with Administrator Role will be created and a generated password will be displayed at output.
+
 
 ---
 

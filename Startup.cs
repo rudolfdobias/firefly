@@ -1,15 +1,15 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using Firefly.CLI;
 using Firefly.Extensions;
 using Firefly.Models;
+using Firefly.Properties;
 using Firefly.Providers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.AspNetCore.DataProtection.KeyManagement;
-using Microsoft.AspNetCore.DataProtection.KeyManagement.Internal;
-using Microsoft.AspNetCore.DataProtection.Repositories;
-using Microsoft.AspNetCore.DataProtection.XmlEncryption;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -38,12 +38,30 @@ namespace Firefly
             Configuration = builder.Build();
         }
 
+        private void HandleCLIAction(IApplicationBuilder app, ILogger<Startup> logger){
+            var perform = Configuration["perform"];
+            if (perform is string){
+                perform = perform.ToUpper();
+                if (Enum.IsDefined(typeof(CLIActions), perform)){
+                    CLIActions action;
+                    Enum.TryParse(perform, out action);
+                    var handler = app.ApplicationServices.GetService<ICLIHandler>();
+                    handler.HandleCommand(action);
+                } else {
+                    throw new ArgumentException("Invalid action name. Use 'migrate', 'seedMasterUser' or 'seed_master_user''.");
+                }
+            }
+        }
+
          // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
 
             ConfigureDevelopmentModeServices(app, env, loggerFactory);
+            
+            HandleCLIAction(app, loggerFactory.CreateLogger<Startup>());
+
             ConfigureAuthServer(app);
             app.UseCors(
                 // very benevolent CORS for start
@@ -58,7 +76,6 @@ namespace Firefly
             if (env.IsDevelopment() || env.IsStaging()){
                 app.UseDebugHeadersMiddleware();
                 loggerFactory.AddDebug();
-                UserSeeder.Initialize(app.ApplicationServices);
                 var crap = new CrapSeeder(app.ApplicationServices);
                 crap.Seed();
             }
@@ -71,7 +88,11 @@ namespace Firefly
             ConfigureDatabase(services);
             ConfigureAuth(services);
             ConfigureMisc(services);
+
+            services.AddSingleton<ICLIHandler, Handler>();
+            
         }
+    
 
         private void ConfigureCryptography(IServiceCollection services)
         {
@@ -88,6 +109,8 @@ namespace Firefly
                 options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
                 options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
             });
+
+            services.AddSingleton<IMasterUserSeeder, MasterUserSeeder>();
         }
 
         private void ConfigureDatabase(IServiceCollection services)

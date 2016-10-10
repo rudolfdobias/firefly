@@ -2,6 +2,7 @@ using System.IO;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
+using System.Collections.Generic;
 
 namespace Firefly
 {
