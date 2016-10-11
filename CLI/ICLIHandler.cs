@@ -1,7 +1,7 @@
-using Firefly.Properties;
+using System.Threading.Tasks;
 
 namespace Firefly.CLI{
     public interface ICLIHandler{
-        void HandleCommand(CLIActions action);
+        Task HandleCommand(CLIActions action);
     }
 }

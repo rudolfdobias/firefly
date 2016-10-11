@@ -8,6 +8,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Options;
+using Firefly.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Firefly.Controllers{
 
@@ -17,31 +21,33 @@ namespace Firefly.Controllers{
     {
         
         private readonly ApplicationDbContext _context;
-        protected readonly DbSet<TEntity> modelDbSet;
-        public GenericResourceController(ApplicationDbContext context)
+        protected readonly DbSet<TEntity> _modelDbSet;
+        protected readonly IServiceProvider _services;
+        protected readonly IOptions<Config> _config;
+        public GenericResourceController(IServiceProvider services)
         {
-            _context = context;
-            this.modelDbSet = _context.Set<TEntity>();
+            _context = services.GetService<ApplicationDbContext>();
+            _config = services.GetService<IOptions<Config>>();
+            _modelDbSet = _context.Set<TEntity>();
         }
 
         [HttpGet]
         public async Task<ResultSet<TEntity>> Get([FromQuery] int limit, [FromQuery] int page)
         {
-            var config = Startup.Configuration;
             if (limit <= 0){
-                limit = Int32.Parse(config["Resources:DefaultLimit"]);
+                limit = _config.Value.Resources.DefaultLimit;
             }
             int skip = 0;
             if (page > 0){
                 skip = limit * page;
             } 
             var result = new ResultSet<TEntity>();
-            var query = modelDbSet.Skip(skip).Take(limit);
+            var query = _modelDbSet.Skip(skip).Take(limit);
             result.Data = await query.ToListAsync();
 
             int? total = null;
-            if (Boolean.Parse(config["Resources:ShowTotalCount"]) == true){
-                total = await modelDbSet.CountAsync();
+            if (_config.Value.Resources.ShowTotalCount){
+                total = await _modelDbSet.CountAsync();
             }
 
             result.Meta = new MetaData {
@@ -58,14 +64,14 @@ namespace Firefly.Controllers{
         [HttpGet("{id}")]
         public TEntity Get(Guid id)
         {
-            return modelDbSet.FirstOrDefault(x=>x.Id == id);
+            return _modelDbSet.FirstOrDefault(x=>x.Id == id);
         }
 
         // POST api/values
         [HttpPost]
         public IActionResult Post([FromBody]TEntity value)
         {
-            modelDbSet.Add(value);
+            _modelDbSet.Add(value);
             _context.SaveChanges();
             return StatusCode(201, value);
         }
@@ -73,7 +79,7 @@ namespace Firefly.Controllers{
         [HttpPatch("{id}")]
         public IActionResult Patch(Guid id, [FromBody]TEntity value){
 
-            var entity = modelDbSet.FirstOrDefault(x => x.Id == id);
+            var entity = _modelDbSet.FirstOrDefault(x => x.Id == id);
             if (entity == null){
                 return StatusCode(404);
             }
@@ -94,11 +100,11 @@ namespace Firefly.Controllers{
         [HttpDelete("{id}")]
         public IActionResult Delete(Guid id){
             
-            var entity = modelDbSet.FirstOrDefault(x => x.Id == id);
+            var entity = _modelDbSet.FirstOrDefault(x => x.Id == id);
             if (entity == null){
                 return StatusCode(404);
             }
-            modelDbSet.Remove(entity);
+            _modelDbSet.Remove(entity);
             _context.SaveChanges();
             return StatusCode(204);
         }

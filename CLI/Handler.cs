@@ -1,6 +1,6 @@
 using System;
+using System.Threading.Tasks;
 using Firefly.Models;
-using Firefly.Properties;
 using Firefly.Providers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,22 +17,25 @@ namespace Firefly.CLI{
             _logger = _serviceProvider.GetService<ILogger<Handler>>();
         }
 
-        public void HandleCommand(CLIActions action)
+        public async Task HandleCommand(CLIActions action)
         {
             switch (action){
                 case CLIActions.MIGRATE:
-                    Migrate();
+                   await Migrate();
                 break;
 
-                case CLIActions.CREATE_MASTER_USER:
-                case CLIActions.CREATEMASTERUSER:
+                case CLIActions.CREATE_USER:
+                case CLIActions.CREATEUSER:
                     SeedMasterUser();
                 break;
 
+                case CLIActions.HELP:
+                    Help();
+                break;
             }
         }
 
-        private async void Migrate(){
+        private async Task Migrate(){
             _logger.LogInformation("Starting database migration...");
             var context = _serviceProvider.GetService<ApplicationDbContext>();
             await context.Database.MigrateAsync();
@@ -42,7 +45,18 @@ namespace Firefly.CLI{
         private void SeedMasterUser(){
             _logger.LogInformation("Seeding a master application user");
             var seeder = _serviceProvider.GetService<IMasterUserSeeder>();
+            
             seeder.Seed();
+        }
+
+        private void Help(){
+            _logger.LogInformation(
+                "\n--- Firefly CLI ---\n\n" +
+                "Available commands:\n" +
+                "--perform=migrate\n" +
+                "--perform=createUser \n" +
+                "\n"
+            );
         }
     }
 }

@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using Firefly.CLI;
+using Firefly.Configuration;
 using Firefly.Extensions;
 using Firefly.Models;
-using Firefly.Properties;
 using Firefly.Providers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
@@ -16,6 +16,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -24,6 +25,7 @@ namespace Firefly
     public class Startup
     {
         public static IConfigurationRoot Configuration { get; set; }
+        private IOptions<Config> ConfigObject { get; set; }
 
         public Startup(IHostingEnvironment env)
         {
@@ -34,34 +36,15 @@ namespace Firefly
                 .AddCommandLine(Program.GetCliArgs())
                 .AddEnvironmentVariables();
                 
-
             Configuration = builder.Build();
-        }
 
-        private void HandleCLIAction(IApplicationBuilder app, ILogger<Startup> logger){
-            var perform = Configuration["perform"];
-            if (perform is string){
-                perform = perform.ToUpper();
-                if (Enum.IsDefined(typeof(CLIActions), perform)){
-                    CLIActions action;
-                    Enum.TryParse(perform, out action);
-                    var handler = app.ApplicationServices.GetService<ICLIHandler>();
-                    handler.HandleCommand(action);
-                } else {
-                    throw new ArgumentException("Invalid action name. Use 'migrate', 'seedMasterUser' or 'seed_master_user''.");
-                }
-            }
         }
 
          // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-
             ConfigureDevelopmentModeServices(app, env, loggerFactory);
-            
-            HandleCLIAction(app, loggerFactory.CreateLogger<Startup>());
-
             ConfigureAuthServer(app);
             app.UseCors(
                 // very benevolent CORS for start
@@ -75,6 +58,7 @@ namespace Firefly
         private void ConfigureDevelopmentModeServices(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory){
             if (env.IsDevelopment() || env.IsStaging()){
                 app.UseDebugHeadersMiddleware();
+    
                 loggerFactory.AddDebug();
                 var crap = new CrapSeeder(app.ApplicationServices);
                 crap.Seed();
@@ -84,15 +68,20 @@ namespace Firefly
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            ConfigureConfig(services);
+            services.AddSingleton<ICLIHandler, Handler>();
             ConfigureCryptography(services);
             ConfigureDatabase(services);
             ConfigureAuth(services);
             ConfigureMisc(services);
-
-            services.AddSingleton<ICLIHandler, Handler>();
-            
         }
     
+        private void ConfigureConfig(IServiceCollection services){
+            services.AddOptions();
+            services.Configure<Config>(Configuration);
+            var sp = services.BuildServiceProvider();
+            ConfigObject = sp.GetService<IOptions<Config>>();
+        }
 
         private void ConfigureCryptography(IServiceCollection services)
         {
@@ -115,7 +104,7 @@ namespace Firefly
 
         private void ConfigureDatabase(IServiceCollection services)
         {
-            var connectionString = Configuration["DbContextSettings:ConnectionString"];
+            var connectionString = ConfigObject.Value.DbContextSettings.ConnectionString;
             services.AddDbContext<ApplicationDbContext>(opts => opts.UseNpgsql(connectionString));
         }
 
@@ -138,15 +127,15 @@ namespace Firefly
                 options.AllowInsecureHttp = true;
                 options.AutomaticAuthenticate = true;    
                 options.DataProtectionProvider = app.ApplicationServices.GetDataProtectionProvider();
-                if (Boolean.Parse(Configuration["Keys:OwnCertificate"])){
+                if (ConfigObject.Value.Keys.OwnCertificate){
                     options.SigningCredentials.AddCertificate(CreateOauthCertificate());
                 }
             });
         }
 
         private X509Certificate2 CreateOauthCertificate(){
-            var path = Configuration["Keys:CertificatePath"];
-            var password = Configuration["Keys:CertificatePassword"];
+            var path = ConfigObject.Value.Keys.CertificatePath;
+            var password = ConfigObject.Value.Keys.CertificatePassword;
             return new X509Certificate2(path, password);
         }
 

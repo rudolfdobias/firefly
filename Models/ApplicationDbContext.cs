@@ -1,16 +1,21 @@
 using System;
+using Firefly.Configuration;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Npgsql.EntityFrameworkCore.PostgreSQL;
 
 namespace Firefly.Models
 {
   public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Role, Guid>
   {
-
-    public ApplicationDbContext(DbContextOptions options) : base(options)
+    
+    protected readonly IOptions<Config> _config;
+    public ApplicationDbContext(DbContextOptions options, IOptions<Config> config) : base(options)
     {
-        Database.EnsureCreated();
+        //Database.EnsureCreated();
+        _config = config;
     }
 
         public DbSet<Article> Articles { get; set; }
@@ -20,8 +25,7 @@ namespace Firefly.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder){
             
             // PostgreSQL uses the public schema by default - not dbo.
-            string schema = "firefly";
-            modelBuilder.HasDefaultSchema(schema); 
+            modelBuilder.HasDefaultSchema(_config.Value.DbContextSettings.DefaultSchema); 
             modelBuilder.HasPostgresExtension("uuid-ossp");
             modelBuilder.Entity<ApplicationUser>(b =>
             {

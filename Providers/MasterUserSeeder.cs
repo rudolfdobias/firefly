@@ -1,6 +1,7 @@
 
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Firefly.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -21,27 +22,27 @@ namespace Firefly.Providers{
             _logger = Logger;
         }
 
-        public void Seed(){
-            
-            SeedRoleAsync(DEFAULT_ROLE);
-            SeedUserAsync(DEFAULT_USERNAME, DEFAULT_ROLE);
-            
+        public void Seed() => Seed(DEFAULT_USERNAME, DEFAULT_ROLE);
+        public void Seed(string username) => Seed(username, DEFAULT_ROLE);
+        public void Seed(string username, string role){
+            SeedRole(role);
+            SeedUser(username, role);
         }
 
-        private async void SeedRoleAsync(string name)
+        private void SeedRole(string name)
         {    
             _logger.LogInformation("Seeding default role " + name + " ...");
             var roleStore = new RoleStore<Role, ApplicationDbContext, Guid>(_dbContext);
 
             if (!_dbContext.Roles.Any(r => r.Name == name))
             {
-                await roleStore.CreateAsync(new Role(){Name = name, NormalizedName = name.ToUpper()});
+                roleStore.CreateAsync(new Role(){Name = name, NormalizedName = name.ToUpper()});
             } else {
                 _logger.LogWarning("Skipping - role " + name + " already exist");
             }
         }
 
-        private async void SeedUserAsync(string username, string role)
+        private void SeedUser(string username, string role)
         {
             _logger.LogInformation("Seeding user " + username + " ...");
 
@@ -49,13 +50,8 @@ namespace Firefly.Providers{
 
             var user = new ApplicationUser
             {
-                FirstName = "System",
-                LastName = "Administrator",
-                Email = "system@example.com",
-                NormalizedEmail = "SYSTEM@EXAMPLE.COM",
                 UserName = username,
                 NormalizedUserName = username.ToUpper(),
-                PhoneNumber = "",
                 EmailConfirmed = true,
                 PhoneNumberConfirmed = true,
                 SecurityStamp = Guid.NewGuid().ToString("D"),
@@ -68,7 +64,7 @@ namespace Firefly.Providers{
                 var hashed = hasher.HashPassword(user,password);
                 user.PasswordHash = hashed;
                 var userStore = new UserStore<ApplicationUser, Role, ApplicationDbContext, Guid>(_dbContext);
-                var result = await userStore.CreateAsync(user);
+                var result = userStore.CreateAsync(user);
                 _dbContext.SaveChanges();
 
             } else {

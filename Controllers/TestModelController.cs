@@ -1,9 +1,10 @@
 using Firefly.Models;
+using System;
 
 namespace Firefly.Controllers {
     public class TestModelController : GenericResourceController<TestModel>{
-        public TestModelController(ApplicationDbContext context) 
-            : base(context)
+        public TestModelController(IServiceProvider services) 
+            : base(services)
         {}
     }
 }
