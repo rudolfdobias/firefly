@@ -45,9 +45,7 @@ namespace Firefly.Providers{
             var manager = context.HttpContext.RequestServices.GetRequiredService<UserManager<ApplicationUser>>();
             if (context.Request.IsPasswordGrantType()) {
                 var user = await manager.FindByNameAsync(context.Request.Username);
-                var roles = await manager.GetRolesAsync(user);
-                logger.LogDebug("Found roles for user " + user.UserName + ":");
-                logger.LogDebugJson(roles);
+                
 
                 if (user == null) {
                     context.Reject(
@@ -56,6 +54,10 @@ namespace Firefly.Providers{
 
                     return;
                 }
+
+                var roles = await manager.GetRolesAsync(user);
+                logger.LogDebug("Found roles for user " + user.UserName + ":");
+                logger.LogDebugJson(roles);
 
                 // Ensure the user is not already locked out.
                 if (manager.SupportsUserLockout && await manager.IsLockedOutAsync(user)) {

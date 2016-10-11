@@ -8,10 +8,5 @@ namespace Firefly.Extensions {
             
             return builder.UseMiddleware<CurrentUserMiddleware>();
         }
-
-        public static IApplicationBuilder UseDebugHeadersMiddleware(this IApplicationBuilder builder){
-            
-            return builder.UseMiddleware<DebugHeadersMiddleware>();
-        }
     }
 }

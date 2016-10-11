@@ -11,7 +11,6 @@ namespace Firefly.Models {
         }
 
         public void Seed(int count = 1000){
-            return;
             for (var i = 0; i < count; i++){
                 var entity = new Article{
                     Title = "Fucking article no. " + i.ToString(),

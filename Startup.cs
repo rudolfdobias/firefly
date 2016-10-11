@@ -44,26 +44,23 @@ namespace Firefly
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-            ConfigureDevelopmentModeServices(app, env, loggerFactory);
+            if (env.IsDevelopment() || env.IsStaging()){
+    
+                loggerFactory.AddDebug();
+                /*var crap = new CrapSeeder(app.ApplicationServices);
+                crap.Seed();*/
+            }         
+             
             ConfigureAuthServer(app);
+              
             app.UseCors(
                 // very benevolent CORS for start
                 builder => builder.AllowAnyOrigin().AllowAnyHeader()
                 );
 
-            //app.UseCurrentUserMiddleware();
             app.UseMvc();
         }
 
-        private void ConfigureDevelopmentModeServices(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory){
-            if (env.IsDevelopment() || env.IsStaging()){
-                app.UseDebugHeadersMiddleware();
-    
-                loggerFactory.AddDebug();
-                var crap = new CrapSeeder(app.ApplicationServices);
-                crap.Seed();
-            }
-        }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)

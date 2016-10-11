@@ -32,8 +32,8 @@ namespace Firefly.Providers{
             }
             this._user = await manager.GetUserAsync(context.User);
             if (this._user == null){
-                return null;
                 logger.LogWarning("User from token does not exists in DB!");
+                return null;
             }
             logger.LogInformation("User " + this._user.UserName + " set to global provider.");
             return GetUser();
